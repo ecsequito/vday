@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Valentine?</title>
+<title>Are you free this Valentine's?</title>
 
 <style>
 body {
@@ -99,14 +99,12 @@ const tantrums = ["Really?", "Are you sure?", "Why? :(", "Please baby 😭"];
 let noClicks = 0;
 let yesScale = 1;
 
-// Keep NO button inside viewport
+// clamp helper to keep button inside viewport
 function clamp(value, min, max){
     return Math.min(Math.max(value,min), max);
 }
 
-let prevX = 50, prevY = 50; // initial NO button pos
-
-// NO button slow escape + pullback + wiggle
+// NO button escape + bounce back toward cursor
 noBtn.addEventListener("mousemove", e=>{
     const rect = noBtn.getBoundingClientRect();
     const btnX = rect.left + rect.width/2;
@@ -116,21 +114,23 @@ noBtn.addEventListener("mousemove", e=>{
     const dy = e.clientY - btnY;
     const distance = Math.sqrt(dx*dx + dy*dy);
 
-    let speed = 0.1; // slow escape factor
-    let pull = 0.02; // small pull back toward cursor
+    if(distance < 120){ // only escape if cursor is near
+        const speed = 0.1; // slow escape
+        const pull = 0.02; // tiny pull back toward cursor
 
-    let moveX = -dx*speed + dx*pull;
-    let moveY = -dy*speed + dy*pull;
+        let moveX = -dx*speed + dx*pull;
+        let moveY = -dy*speed + dy*pull;
 
-    // new position
-    let newLeft = clamp(rect.left + moveX, 10, window.innerWidth - rect.width - 10);
-    let newTop = clamp(rect.top + moveY, 10, window.innerHeight - rect.height - 10);
+        let newLeft = clamp(rect.left + moveX, 5, window.innerWidth - rect.width - 5);
+        let newTop = clamp(rect.top + moveY, 5, window.innerHeight - rect.height - 5);
 
-    noBtn.style.left = newLeft + "px";
-    noBtn.style.top = newTop + "px";
+        noBtn.style.left = newLeft + "px";
+        noBtn.style.top = newTop + "px";
 
-    // wiggle
-    noBtn.classList.add("wiggle");
+        noBtn.classList.add("wiggle");
+    } else {
+        noBtn.classList.remove("wiggle");
+    }
 });
 
 noBtn.addEventListener("mouseleave", ()=>{
@@ -144,7 +144,7 @@ noBtn.addEventListener("click", ()=>{
     tantrum.classList.add("shake");
     tantrum.style.animationDuration = Math.max(0.05,0.3-noClicks*0.05)+"s";
 
-    // YES button grows
+    // YES button grows & glows
     yesScale += 0.2;
     yesBtn.style.transform = `scale(${yesScale})`;
     yesBtn.style.boxShadow = `0 0 ${20 + noClicks*10}px hotpink`;
@@ -188,3 +188,4 @@ document.addEventListener("click", e=>{
 </script>
 </body>
 </html>
+
