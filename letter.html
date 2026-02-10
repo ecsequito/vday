@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>For You 💖</title>
+
+<style>
+body {
+    font-family: "Courier New", monospace;
+    background: #ffe6f2;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.container {
+    text-align: center;
+}
+
+/* ENVELOPE */
+.envelope {
+    width: 320px;
+    height: 220px;
+    background: #f8f8f8;
+    border: 2px solid #ccc;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+.flap {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 50%;
+    background: #eee;
+    transform-origin: top;
+    transform: rotateX(0deg);
+}
+.letter {
+    position: absolute;
+    inset: 20px;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    transform: translateY(100%);
+    transition: 1s;
+}
+.letter.show {
+    transform: translateY(0);
+}
+
+/* HEARTS */
+.heart {
+    position: fixed;
+    pointer-events: none;
+}
+
+/* SMISKI */
+.smiski img {
+    width: 160px;
+    animation: pop 0.6s ease;
+}
+@keyframes pop {
+    0% { transform: scale(0); }
+    80% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+</style>
+</head>
+
+<body>
+
+<audio id="music" loop>
+    <source src="song.mp3" type="audio/mpeg">
+</audio>
+
+<div class="container">
+    <div class="envelope" id="env">
+        <div class="flap" id="flap"></div>
+        <div class="letter" id="letter">
+            <p id="text"></p>
+        </div>
+    </div>
+
+    <div class="smiski">
+        <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXlnM2lvNTF4enhpamJhdnhnZGgwazBtdTdnMGQ3eGE1Ym5jazkyciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/pzbGEEg4kDXALavOqA/giphy.gif">
+    </div>
+</div>
+
+<script>
+const env = document.getElementById("env");
+const flap = document.getElementById("flap");
+const letter = document.getElementById("letter");
+const textEl = document.getElementById("text");
+const music = document.getElementById("music");
+
+music.volume = 0;
+music.play();
+let v = 0;
+const fade = setInterval(() => {
+    if (v < 1) music.volume = v += 0.02;
+    else clearInterval(fade);
+}, 200);
+
+const msg = `Happy Valentine's Day, mahal!❤️
+
+Thank you for hoosing this moment with me.
+If this small gesture made you smile,
+ then my heart did its job.
+
+I love you so much, more than words allow.`;
+
+let i = 0;
+function typeWriter() {
+    if (i < msg.length) {
+        textEl.textContent += msg[i++];
+        setTimeout(typeWriter, 50);
+    }
+}
+
+function playLetter() {
+    flap.style.transform = "rotateX(0deg)";
+    letter.classList.remove("show");
+    textEl.textContent = "";
+    i = 0;
+
+    flap.animate(
+        [{transform:"rotateX(0deg)"},{transform:"rotateX(180deg)"}],
+        {duration:1200, fill:"forwards"}
+    );
+
+    setTimeout(() => {
+        letter.classList.add("show");
+        typeWriter();
+    }, 1200);
+}
+
+env.addEventListener("click", playLetter);
+
+setInterval(() => {
+    const h = document.createElement("div");
+    h.textContent = "❤️";
+    h.className = "heart";
+    h.style.left = Math.random()*100+"vw";
+    h.style.top = "100vh";
+    h.animate([
+        {transform:"translateY(0)",opacity:1},
+        {transform:"translateY(-120vh)",opacity:0}
+    ],{duration:2000});
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),2000);
+}, 400);
+</script>
+
+</body>
+</html>
+
