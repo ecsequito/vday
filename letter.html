@@ -8,16 +8,60 @@
 body {
     font-family: "Courier New", monospace;
     background: #ffe6f2;
+    margin: 0;
     height: 100vh;
+    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
     cursor: pointer;
 }
 
 .container {
-    text-align: center;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* COLLAGE BACKGROUND - scrapbook style */
+.collage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+.collage img, .collage video {
+    position: absolute;
+    width: 150px;
+    height: auto;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    object-fit: cover;
+    transform-origin: center;
+    animation: float 6s ease-in-out infinite alternate;
+}
+
+/* FLOAT ANIMATION */
+@keyframes float {
+    0% { transform: translate(0px,0px) rotate(0deg); }
+    50% { transform: translate(0px,-10px) rotate(2deg); }
+    100% { transform: translate(0px,0px) rotate(0deg); }
+}
+
+/* ENVELOPE CENTER */
+.envelope-container {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* ENVELOPE */
@@ -26,9 +70,9 @@ body {
     height: 220px;
     background: #f8f8f8;
     border: 2px solid #ccc;
-    position: relative;
     overflow: hidden;
     cursor: pointer;
+    position: relative;
 }
 .flap {
     position: absolute;
@@ -45,6 +89,7 @@ body {
     background: white;
     border: 1px solid #ccc;
     padding: 10px;
+    font-family: "Courier New", monospace;
     transform: translateY(100%);
     transition: 1s;
 }
@@ -52,13 +97,12 @@ body {
     transform: translateY(0);
 }
 
-/* HEARTS */
-.heart {
-    position: fixed;
+/* SMISKI - fixed below envelope */
+.smiski {
+    margin-top: 20px;
+    z-index: 20;
     pointer-events: none;
 }
-
-/* SMISKI */
 .smiski img {
     width: 160px;
     animation: pop 0.6s ease;
@@ -68,25 +112,48 @@ body {
     80% { transform: scale(1.2); }
     100% { transform: scale(1); }
 }
+
+/* HEARTS */
+.heart {
+    position: fixed;
+    pointer-events: none;
+}
 </style>
 </head>
 
 <body>
 
+<!-- MUSIC -->
 <audio id="music" loop>
     <source src="song.mp3" type="audio/mpeg">
 </audio>
 
 <div class="container">
-    <div class="envelope" id="env">
-        <div class="flap" id="flap"></div>
-        <div class="letter" id="letter">
-            <p id="text"></p>
-        </div>
+
+    <!-- COLLAGE BACKGROUND -->
+    <div class="collage" id="collage">
+        <!-- LEFT SIDE -->
+        <img src="left1.jpg" style="top:15%; left:5%; transform:rotate(-5deg);">
+        <video src="left2.mp4" autoplay muted loop style="top:55%; left:15%; width:180px; transform:rotate(-3deg);"></video>
+
+        <!-- RIGHT SIDE -->
+        <img src="right1.png" style="top:25%; left:75%; transform:rotate(6deg);">
+        <video src="right2.mp4" autoplay muted loop style="top:60%; left:70%; width:180px; transform:rotate(4deg);"></video>
     </div>
 
-    <div class="smiski">
-        <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXlnM2lvNTF4enhpamJhdnhnZGgwazBtdTdnMGQ3eGE1Ym5jazkyciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/pzbGEEg4kDXALavOqA/giphy.gif">
+    <!-- CENTER ENVELOPE -->
+    <div class="envelope-container">
+        <div class="envelope" id="env">
+            <div class="flap" id="flap"></div>
+            <div class="letter" id="letter">
+                <p id="text"></p>
+            </div>
+        </div>
+
+        <!-- SMISKI BELOW ENVELOPE -->
+        <div class="smiski">
+            <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXlnM2lvNTF4enhpamJhdnhnZGgwazBtdTdnMGQ3eGE1Ym5jazkyciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/pzbGEEg4kDXALavOqA/giphy.gif">
+        </div>
     </div>
 </div>
 
@@ -97,14 +164,13 @@ const letter = document.getElementById("letter");
 const textEl = document.getElementById("text");
 const music = document.getElementById("music");
 
+// Music fade-in
 music.volume = 0;
 music.play();
 let v = 0;
-const fade = setInterval(() => {
-    if (v < 1) music.volume = v += 0.02;
-    else clearInterval(fade);
-}, 200);
+const fade = setInterval(() => { if(v<1) music.volume=v+=0.02; else clearInterval(fade); },200);
 
+// Letter text
 const msg = `Happy Valentine's Day, mahal!❤️
 
 Thank you for hoosing this moment with me.
@@ -114,47 +180,64 @@ If this small gesture made you smile,
 I love you so much, more than words allow.`;
 
 let i = 0;
+
+// TYPEWRITER + COLLAGE FLOAT
 function typeWriter() {
-    if (i < msg.length) {
+    if(i<msg.length){
         textEl.textContent += msg[i++];
-        setTimeout(typeWriter, 50);
+        // subtle float for collage items
+        document.querySelectorAll(".collage img, .collage video").forEach(el=>{
+            const dx = (Math.random()-0.5)*4;
+            const dy = (Math.random()-0.5)*4;
+            el.style.transform = `translate(${dx}px,${dy}px) rotate(${(Math.random()-0.5)*10}deg)`;
+        });
+        setTimeout(typeWriter,50);
+    } else {
+        // reset transforms to rotation only
+        document.querySelectorAll(".collage img, .collage video").forEach(el=>{
+            const rot = parseFloat(el.style.transform.match(/rotate\((-?\d+\.?\d*)deg\)/)?.[1]||0);
+            el.style.transform = `rotate(${rot}deg)`;
+        });
     }
 }
 
+// PLAY LETTER
 function playLetter() {
     flap.style.transform = "rotateX(0deg)";
     letter.classList.remove("show");
     textEl.textContent = "";
-    i = 0;
+    i=0;
 
-    flap.animate(
-        [{transform:"rotateX(0deg)"},{transform:"rotateX(180deg)"}],
-        {duration:1200, fill:"forwards"}
-    );
-
-    setTimeout(() => {
-        letter.classList.add("show");
-        typeWriter();
-    }, 1200);
+    flap.animate([{transform:"rotateX(0deg)"},{transform:"rotateX(180deg)"}],{duration:1200,fill:"forwards"});
+    setTimeout(()=>{letter.classList.add("show"); typeWriter();},1200);
 }
 
+// replay letter on envelope click
 env.addEventListener("click", playLetter);
 
-setInterval(() => {
-    const h = document.createElement("div");
-    h.textContent = "❤️";
-    h.className = "heart";
-    h.style.left = Math.random()*100+"vw";
-    h.style.top = "100vh";
-    h.animate([
-        {transform:"translateY(0)",opacity:1},
-        {transform:"translateY(-120vh)",opacity:0}
-    ],{duration:2000});
+// Floating hearts continuously
+setInterval(()=>{
+    const h=document.createElement("div");
+    h.textContent="❤️";
+    h.className="heart";
+    h.style.left=Math.random()*100+"vw";
+    h.style.top="100vh";
+    h.animate([{transform:"translateY(0)",opacity:1},{transform:"translateY(-120vh)",opacity:0}],{duration:2000});
     document.body.appendChild(h);
     setTimeout(()=>h.remove(),2000);
-}, 400);
-</script>
+},400);
 
+// Hearts appear on click
+document.addEventListener("click",e=>{
+    const h=document.createElement("div");
+    h.textContent="💗";
+    h.className="heart";
+    h.style.left=e.clientX+"px";
+    h.style.top=e.clientY+"px";
+    document.body.appendChild(h);
+    h.animate([{opacity:1},{opacity:0}],{duration:800});
+    setTimeout(()=>h.remove(),800);
+});
+</script>
 </body>
 </html>
-
